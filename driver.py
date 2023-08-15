@@ -44,7 +44,9 @@ class spaceship(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(pygame.transform.scale(pygame.image.load("Assets/spaceship.png"), (spaceship_width, spaceship_height)), 270)
         self.rect = self.image.get_rect(center=pos)
 
+
     def update(self):
+        global is_gameover
         keys_pressed = pygame.key.get_pressed()
         if(keys_pressed[pygame.K_UP]):
             self.rect.y -= spaceship_velocity
@@ -61,9 +63,15 @@ class spaceship(pygame.sprite.Sprite):
         if(keys_pressed[pygame.K_RIGHT]):
             self.rect.right += spaceship_velocity
             if(self.rect.left > screen_width):
-                self.rect.right = 0       
+                self.rect.right = 0 
+
+        for bullet in bullets:
+            if(self.rect.colliderect(bullet)):
+                if((pygame.time.get_ticks()-bullet.time_of_launch) > 1000):
+                    is_gameover = True
+                    print("You have been hit by a bullet")
              
-player_ship = spaceship((screen_width/3, screen_height/3))
+player_ship = spaceship((spaceship_width/2, screen_height/2))
 spaceships.add(player_ship)
 
     
@@ -76,16 +84,25 @@ class monster(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center = pos)
     
     def update(self):
-        self.rect.x -= monster_velocity
+        if(level == "easy"):
+            self.rect.x -= monster_velocity
+        elif(level == "normal"):
+            self.rect.x -= monster_velocity*1.3
+        else:
+            self.rect.x -= monster_velocity*1.5
+
         for bullet in bullets:
             if(self.rect.colliderect(bullet.rect)):
                 self.kill()
+                bullet.kill()
         
         global is_gameover, current_time
         if(self.rect.colliderect(player_ship.rect)):
             is_gameover = True
+            print("Monster has caught you")
         if(self.rect.right < 0):
             is_gameover = True
+            print("Monster has reached the end")
         if(is_gameover):
             current_time = pygame.time.get_ticks()
         
@@ -103,12 +120,32 @@ class bullet(pygame.sprite.Sprite):
         self.image = pygame.Surface((bullet_width, bullet_height))
         self.rect = self.image.get_rect(center = pos)
         self.image.fill("Red")
+        self.time_of_launch = pygame.time.get_ticks()
+        self.wrap_count = 0
     
     def update(self):
-        if(self.rect.x > screen_width):
-            self.kill()
+        if(level == "easy"):
+            if(self.rect.left > screen_width):
+                self.kill()
+            else:
+                self.rect.x += bullet_velocity
+        elif(level == "medium"):
+            self.rect.x += bullet_velocity
+            if((self.rect.left > screen_width)):
+                self.rect.right = 0
+                self.wrap_count += 1
+            if(self.wrap_count > 1):
+                self.kill()
         else:
             self.rect.x += bullet_velocity
+            if(self.rect.left > screen_width):
+                self.rect.right = 0
+                self.wrap_count += 1
+            if(self.wrap_count > 2):
+                self.kill()
+
+            
+
     
 
 class text: #(string, center_pos, color_bg, color_in, font)
@@ -185,7 +222,7 @@ while run:
         if(event.type == pygame.QUIT):
             pygame.quit()
             sys.exit()
-            
+
         if(is_start_menu):
             if(event.type == pygame.MOUSEBUTTONUP):
                 if(easy_text.rect.collidepoint(pygame.mouse.get_pos())):
@@ -202,7 +239,8 @@ while run:
                     is_start_menu = True
                     level = "none"
                     monsters.empty()
-                    player_ship.rect.center = (screen_width/2, screen_height/3)
+                    bullets.empty()
+                    player_ship.rect.center = (spaceship_width/2, screen_height/2)
                     new_monster = monster((random.randint(screen_width/2, screen_width-monster_width/2), random.randint(monster_height/2, screen_height - monster_height/2)))
                     monsters.add(new_monster)   
 
