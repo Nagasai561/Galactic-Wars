@@ -10,7 +10,7 @@ spaceship_velocity = 20
 monster_width, monster_height = 100, 100
 monster_velocity = 7
 bullet_width, bullet_height = 100,10
-bullet_velocity = 50
+bullet_velocity = 40
 
 
 #init
@@ -35,7 +35,8 @@ level = "none"
 
 #assets and objects
 space = pygame.transform.scale(pygame.image.load("Assets/space.jpeg"), (screen_width, screen_height))
-start_menu_bg = pygame.transform.scale(pygame.image.load("Assets/start_menu_bg.jpg"), (screen_width, screen_width))
+start_menu_bg = pygame.Surface((screen_width, screen_height))
+start_menu_bg.fill((0,0,0))
 
 spaceships = pygame.sprite.Group()
 class spaceship(pygame.sprite.Sprite):
@@ -43,6 +44,7 @@ class spaceship(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.transform.rotate(pygame.transform.scale(pygame.image.load("Assets/spaceship.png"), (spaceship_width, spaceship_height)), 270)
         self.rect = self.image.get_rect(center=pos)
+        self.mask = pygame.mask.from_surface(self.image)
 
 
     def update(self):
@@ -67,9 +69,13 @@ class spaceship(pygame.sprite.Sprite):
 
         for bullet in bullets:
             if(self.rect.colliderect(bullet)):
-                if((pygame.time.get_ticks()-bullet.time_of_launch) > 1000):
-                    is_gameover = True
-                    print("You have been hit by a bullet")
+                if(pygame.sprite.spritecollide(bullet, spaceships, False, pygame.sprite.collide_mask)):
+                    if(bullet.rect.center[0] <= self.rect.center[0]):
+                        is_gameover = True
+                        print("You have been hit by a bullet")
+            
+        
+        
              
 player_ship = spaceship((spaceship_width/2, screen_height/2))
 spaceships.add(player_ship)
@@ -82,6 +88,7 @@ class monster(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.transform.scale(pygame.image.load("Assets/space_monster.png"), (monster_width, monster_height))
         self.rect = self.image.get_rect(center = pos)
+        self.mask = pygame.mask.from_surface(self.image)
     
     def update(self):
         if(level == "easy"):
@@ -89,7 +96,7 @@ class monster(pygame.sprite.Sprite):
         elif(level == "normal"):
             self.rect.x -= monster_velocity*1.3
         else:
-            self.rect.x -= monster_velocity*1.5
+            self.rect.x -= monster_velocity*1.3
 
         for bullet in bullets:
             if(self.rect.colliderect(bullet.rect)):
@@ -97,7 +104,10 @@ class monster(pygame.sprite.Sprite):
                 bullet.kill()
         
         global is_gameover, current_time
-        if(self.rect.colliderect(player_ship.rect)):
+        # if(self.rect.colliderect(player_ship.rect)):
+        #     is_gameover = True
+        #     print("Monster has caught you")
+        if pygame.sprite.spritecollide(self, spaceships, False, pygame.sprite.collide_mask):
             is_gameover = True
             print("Monster has caught you")
         if(self.rect.right < 0):
@@ -106,9 +116,19 @@ class monster(pygame.sprite.Sprite):
         if(is_gameover):
             current_time = pygame.time.get_ticks()
         
-        if not monsters:
-            new_monster = monster((random.randint(screen_width/2, screen_width-monster_width/2), random.randint(monster_height/2, screen_height - monster_height/2)))
-            monsters.add(new_monster)
+        if level == "easy":
+            if not monsters:
+                new_monster = monster((random.randint(screen_width/2, screen_width-monster_width/2), random.randint(monster_height/2, screen_height - monster_height/2)))
+                monsters.add(new_monster)
+        elif level == "medium":
+            if len(monsters) < 2:
+                new_monster = monster((random.randint(screen_width/2, screen_width-monster_width/2), random.randint(monster_height/2, screen_height - monster_height/2)))
+                monsters.add(new_monster)
+        else:
+            if len(monsters) < 3:
+                new_monster = monster((random.randint(screen_width/2, screen_width-monster_width/2), random.randint(monster_height/2, screen_height - monster_height/2)))
+                monsters.add(new_monster)
+
 
 new_monster = monster((random.randint(screen_width/2, screen_width-monster_width/2), random.randint(monster_height/2, screen_height - monster_height/2)))
 monsters.add(new_monster)     
@@ -120,7 +140,6 @@ class bullet(pygame.sprite.Sprite):
         self.image = pygame.Surface((bullet_width, bullet_height))
         self.rect = self.image.get_rect(center = pos)
         self.image.fill("Red")
-        self.time_of_launch = pygame.time.get_ticks()
         self.wrap_count = 0
     
     def update(self):
@@ -149,11 +168,10 @@ class bullet(pygame.sprite.Sprite):
     
 
 class text: #(string, center_pos, color_bg, color_in, font)
-    def __init__(self, string, center_pos, color_in, color_text, font):
+    def __init__(self, string, center_pos, color_text, font):
         self.text_surf = font.render(string, False, color_text)
         self.rect = self.text_surf.get_rect(center=center_pos)
         self.bg_surf = pygame.Surface(self.text_surf.get_size())
-        self.bg_surf.fill(color_in)
     def draw_text(self):
         screen.blit(self.bg_surf, self.rect)
         screen.blit(self.text_surf, self.rect)
@@ -162,12 +180,12 @@ class text: #(string, center_pos, color_bg, color_in, font)
 #textual part
 font_big = pygame.font.SysFont("Comic Sans MS", 180)
 font_small = pygame.font.SysFont("Comic Sans MS", 90)
-easy_text = text("Easy", (screen_width*(3/16), screen_height*(3/4)), (114, 160, 193), (0, 255, 42), font_small)
-medium_text = text("Medium", (screen_width*(8/16), screen_height*(3/4)), (114, 160, 193), (0, 255, 42), font_small)
-hard_text = text("Hard", (screen_width*(13/16), screen_height*(3/4)), (114, 160, 193), (0, 255, 42), font_small)
-galactic_war_text = text("Galactic Wars", (screen_width/2,screen_height/3), (114,160,193), (0,255,42), font_big)
-gameover_text = text("Game Over", (screen_width/2, screen_height*(1/5)), (0,0,0), (255,255,255), font_big)
-reset_text = text("Reset", (screen_width*(1/2), screen_height*(18/20)), (0,0,0), (255,255,255), font_small)
+easy_text = text("Easy", (screen_width*(3/16), screen_height*(3/4)), (0, 255, 42), font_small)
+medium_text = text("Medium", (screen_width*(8/16), screen_height*(3/4)),  (0, 255, 42), font_small)
+hard_text = text("Hard", (screen_width*(13/16), screen_height*(3/4)),  (0, 255, 42), font_small)
+galactic_war_text = text("Galactic Wars", (screen_width/2,screen_height/3),  (0,255,42), font_big)
+gameover_text = text("Game Over", (screen_width/2, screen_height*(1/5)),  (255,255,255), font_big)
+reset_text = text("Reset", (screen_width*(1/2), screen_height*(18/20)), (255,255,255), font_small)
 
 
 
@@ -194,9 +212,9 @@ def shoot_bullet():
 def gameover():
     screen.blit(start_menu_bg, (0,0))
     gameover_text.draw_text()
-    level_text = text(f"Level: {level}", (screen_width/2, screen_height*(2/5)), (0,0,0), (255,255,255), font_small)
+    level_text = text(f"Level: {level}", (screen_width/2, screen_height*(2/5)), (255,255,255), font_small)
     level_text.draw_text()
-    score_text = text(f"Score is: {(current_time-started_time)/1000}", (screen_width/2, screen_height*(1/2)), (0,0,0), (255,255,255), font_big)
+    score_text = text(f"Score is: {math.floor((current_time-started_time)/100)}", (screen_width/2, screen_height*(4/7)), (255,255,255), font_big)
     score_text.draw_text()
     reset_text.draw_text()
     pygame.display.update()
