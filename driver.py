@@ -30,6 +30,7 @@ current_time = 0
 is_gameover = False
 is_start_menu = True
 level = "none"
+reason = "none"
 
 
 
@@ -96,23 +97,23 @@ class monster(pygame.sprite.Sprite):
         elif(level == "normal"):
             self.rect.x -= monster_velocity*1.3
         else:
-            self.rect.x -= monster_velocity*1.3
+            self.rect.x -= monster_velocity*1.5
 
         for bullet in bullets:
             if(self.rect.colliderect(bullet.rect)):
                 self.kill()
                 bullet.kill()
         
-        global is_gameover, current_time
+        global is_gameover, current_time, reason
         # if(self.rect.colliderect(player_ship.rect)):
         #     is_gameover = True
         #     print("Monster has caught you")
         if pygame.sprite.spritecollide(self, spaceships, False, pygame.sprite.collide_mask):
             is_gameover = True
-            print("Monster has caught you")
+            reason = "Monster has caught you"
         if(self.rect.right < 0):
             is_gameover = True
-            print("Monster has reached the end")
+            reason = "Monster has reached the end"
         if(is_gameover):
             current_time = pygame.time.get_ticks()
         
@@ -184,7 +185,7 @@ easy_text = text("Easy", (screen_width*(3/16), screen_height*(3/4)), (0, 255, 42
 medium_text = text("Medium", (screen_width*(8/16), screen_height*(3/4)),  (0, 255, 42), font_small)
 hard_text = text("Hard", (screen_width*(13/16), screen_height*(3/4)),  (0, 255, 42), font_small)
 galactic_war_text = text("Galactic Wars", (screen_width/2,screen_height/3),  (0,255,42), font_big)
-gameover_text = text("Game Over", (screen_width/2, screen_height*(1/5)),  (255,255,255), font_big)
+gameover_text = text("Game Over", (screen_width/2, screen_height*(1/6)),  (255,255,255), font_big)
 reset_text = text("Reset", (screen_width*(1/2), screen_height*(18/20)), (255,255,255), font_small)
 
 
@@ -212,9 +213,11 @@ def shoot_bullet():
 def gameover():
     screen.blit(start_menu_bg, (0,0))
     gameover_text.draw_text()
-    level_text = text(f"Level: {level}", (screen_width/2, screen_height*(2/5)), (255,255,255), font_small)
+    reason_text = text(reason, (screen_width/2, screen_height*(1/3)), (255,255,255), font_small)
+    reason_text.draw_text()
+    level_text = text(f"Level: {level}", (screen_width/2, screen_height*(1/2)), (255,255,255), font_small)
     level_text.draw_text()
-    score_text = text(f"Score is: {math.floor((current_time-started_time)/100)}", (screen_width/2, screen_height*(4/7)), (255,255,255), font_big)
+    score_text = text(f"Score is: {math.floor((current_time-started_time)/100)}", (screen_width/2, screen_height*(5/8)), (255,255,255), font_big)
     score_text.draw_text()
     reset_text.draw_text()
     pygame.display.update()
