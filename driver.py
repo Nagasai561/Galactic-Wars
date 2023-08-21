@@ -30,7 +30,7 @@ is_start_menu = True
 level = "none"
 reason = "none"
 monster_level = ["Assets/space_monster_blue.png", "Assets/space_monster_green.png", "Assets/space_monster_red.png"]
-monster_health = [1,2,4]
+monster_health = [1,2,3]
 
 
 
