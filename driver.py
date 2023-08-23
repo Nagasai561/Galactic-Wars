@@ -4,12 +4,12 @@ import sys
 import random
 
 #constants
-screen_width, screen_height = 1500, 1000
-spaceship_width, spaceship_height = 150, 150
+screen_width, screen_height = 1100, 700
+spaceship_width, spaceship_height = 100, 100
 spaceship_velocity = 20
-monster_width, monster_height = 100, 100
+monster_width, monster_height = 70, 70
 monster_velocity = 7
-bullet_width, bullet_height = 100,10
+bullet_width, bullet_height = 100,7
 bullet_velocity = 40
 
 
@@ -30,7 +30,7 @@ is_start_menu = True
 level = "none"
 reason = "none"
 monster_level = ["Assets/space_monster_blue.png", "Assets/space_monster_green.png", "Assets/space_monster_red.png"]
-monster_health = [1,2,3]
+monster_health = [1,2,]
 
 
 
@@ -51,7 +51,7 @@ class spaceship(pygame.sprite.Sprite):
 
 
     def update(self):
-        global is_gameover
+        global is_gameover, reason
         keys_pressed = pygame.key.get_pressed()
         if(keys_pressed[pygame.K_UP]):
             self.rect.y -= spaceship_velocity
@@ -75,7 +75,7 @@ class spaceship(pygame.sprite.Sprite):
                 if(pygame.sprite.spritecollide(bullet, spaceships, False, pygame.sprite.collide_mask)):
                     if(bullet.rect.center[0] <= self.rect.center[0]):
                         is_gameover = True
-                        print("You have been hit by a bullet")
+                        reason = "You have been hit by bullet"
             
         
         
@@ -138,15 +138,15 @@ class monster(pygame.sprite.Sprite):
         
         if level == "easy":
             if not monsters:
-                new_monster = monster((random.randint(screen_width/2, screen_width-monster_width/2), random.randint(monster_height/2, screen_height - monster_height/2)))
+                new_monster = monster((random.randint(screen_width*(3/4), screen_width-monster_width/2), random.randint(monster_height/2, screen_height - monster_height/2)))
                 monsters.add(new_monster)
         elif level == "medium":
             if len(monsters) < 2:
-                new_monster = monster((random.randint(screen_width/2, screen_width-monster_width/2), random.randint(monster_height/2, screen_height - monster_height/2)))
+                new_monster = monster((random.randint(screen_width*(3/4), screen_width-monster_width/2), random.randint(monster_height/2, screen_height - monster_height/2)))
                 monsters.add(new_monster)
         else:
             if len(monsters) < 3:
-                new_monster = monster((random.randint(screen_width/2, screen_width-monster_width/2), random.randint(monster_height/2, screen_height - monster_height/2)))
+                new_monster = monster((random.randint(screen_width*(3/4), screen_width-monster_width/2), random.randint(monster_height/2, screen_height - monster_height/2)))
                 monsters.add(new_monster)
 
 
@@ -197,15 +197,15 @@ class text: #(string, center_pos, color_bg, color_in, font)
 
 
 #textual part
-font_big = pygame.font.SysFont("Comic Sans MS", 180)
-font_small = pygame.font.SysFont("Comic Sans MS", 90)
+font_big = pygame.font.SysFont("Comic Sans MS", math.floor(screen_height/5))
+font_small = pygame.font.SysFont("Comic Sans MS", math.floor(screen_height/8))
 easy_text = text("Easy", (screen_width*(3/16), screen_height*(3/4)), (0, 255, 42), font_small)
 medium_text = text("Medium", (screen_width*(8/16), screen_height*(3/4)),  (0, 255, 42), font_small)
 hard_text = text("Hard", (screen_width*(13/16), screen_height*(3/4)),  (0, 255, 42), font_small)
 galactic_war_text = text("Galactic Wars", (screen_width/2,screen_height/3),  (0,255,42), font_big)
 gameover_text = text("Game Over", (screen_width/2, screen_height*(3/22)),  (255,0,0), font_big)
 reset_text = text("Reset", (screen_width*(1/2), screen_height*(39/44)), (0,255,0), font_small)
-score_while_running = text("Score", (screen_width/2, screen_height/6), (255,255,255), font_small)
+# score_while_running = text("Score", (screen_width/2, screen_height/6), (255,255,255), font_small)
 
 
 #--------------------functions--------------------------
@@ -215,7 +215,7 @@ def draw_stuff():
     spaceships.draw(screen)
     monsters.draw(screen)
     bullets.draw(screen)
-    score_while_running = text(f"Score: {score}", (screen_width*(18/20), screen_height/15), (255,255,255), font_small)
+    score_while_running = text(f"Score: {score}", (screen_width*(17/20), screen_height/15), (255,255,255), font_small)
     score_while_running.draw_text()
     pygame.display.update()
 
