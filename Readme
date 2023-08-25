@@ -9,3 +9,10 @@ Rules:
 2. If a monster touches your spaceship, you lose
 3. (For only medium and hard levels) The bullets can also wrap around. You lose if you get hit by your own bullets.
 
+You can increase the size of screen by following the steps below:
+1. Open "driver.py" file
+2. In line 7, there is a variable called "screen_size". Increase or decrease it, according to your liking.
+
+
+Have Fun!!!!
+
