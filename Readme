@@ -1,0 +1,11 @@
+Basic Instructions:
+1. Use arrow keys to move the spaceship
+2. Use spacebar to shoot bullets
+3. You can wrap around the edges
+
+You can read rules of the game here. But I would suggest you to get to know the rules of the game by yourself by playing the game.
+Rules:
+1. If a monster reaches the left end of screen, you lose
+2. If a monster touches your spaceship, you lose
+3. (For only medium and hard levels) The bullets can also wrap around. You lose if you get hit by your own bullets.
+
